@@ -48,6 +48,10 @@ Qualidade de dado não é uma coisa só. Cubra as dimensões e declare o **esper
     a janela ingerida/transformada. É o portão que pega o lixo da origem, que o CI não vê.
 - **Piso da casa:** dado que a DoD (§35) marca como crítico (dinheiro, PII, caminho crítico) tem
   expectations **e** roda o portão em runtime. "Confiei na origem" não é controle de qualidade.
+- **Expectation obrigatória em ambiente de não-produção:** **0 linhas com domínio de e-mail (e de
+  contato em geral) fora da allowlist de teste**. Dado de contato **real** num ambiente que envia é
+  **quarentena** e **refresh reprovado**, nunca warning — é ele que vira o disparo em massa no
+  próximo laço (`references/governanca.md` §5.1).
 
 ## 4. Quarentena e dead-letter — o destino do dado ruim (o piso)
 

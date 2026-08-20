@@ -2,6 +2,32 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/). Versionamento semântico.
 
+## [0.2.0] — 2026-08-20
+
+Propagação do piso **"efeito externo NUNCA sai de não-produção"** no recorte de **DADOS**: o
+gatilho do incidente que originou o piso (`schematize-engineering` →
+`references/efeitos-externos.md`) foi **o dataset**, não o código — uma base de hml com endereços
+que **existiam** virou **>5.000 e-mails reais** no primeiro laço.
+
+### Adicionado
+- **SKILL.md** — piso inegociável **9** ("Cópia de prd para não-prd NUNCA leva e-mail (nem contato)
+  real"): reescrita do endereço para o domínio de teste em rota nula, determinismo por HMAC,
+  reescrita na saída de prd, fixtures/factories só no domínio de teste, expectation obrigatória;
+  menção ao piso na `description` do frontmatter (pisos renumerados: archive passa a ser o 10).
+- **references/governanca.md** §5.1 — "Endereço de contato: a cópia prd → hml/dev REESCREVE o
+  e-mail (rota nula)": por que **mascarar parcialmente não basta** (`j***@gmail.com` continua no
+  domínio real e volta a ser entregável); fórmula determinística
+  `user+hex(HMAC-SHA256(k_snapshot, email))[0:12]@test.<domain>` preservando **unicidade e joins**;
+  por que **hash sem chave** é reidentificação por dicionário (o espaço de e-mails é enumerável) e
+  por que a chave é **por snapshot, no cofre e descartável**; extensão a telefone/push token/
+  webhook do cliente/token de PSP; a reescrita acontece **na saída de prd**; geradores de fixture/
+  factory/seed/persona/carga só emitem `<papel>+<run-id>-<n>@test.<domain>` (com a lista de vetados);
+  a coluna reescrita **continua marcada como PII** no catálogo do destino.
+- **references/qualidade.md** §3 — expectation obrigatória em não-produção: **0 linhas com domínio
+  de contato fora da allowlist de teste**; o que reprova vai pra **quarentena** e o refresh
+  **falha** (nunca warning).
+- **assets/CLAUDE.md** — piso sempre-on **9** com a regra de reescrita e os vetados.
+
 ## [0.1.0] — 2026-08-15
 
 Primeira versão da skill de **engenharia de dados** da casa — a disciplina "o dado é um contrato",

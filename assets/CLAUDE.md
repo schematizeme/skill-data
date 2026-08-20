@@ -40,7 +40,20 @@ memória.
 8. **Lineage rastreável — nenhum dataset órfão.** Todo dataset tem **origem, dono e destino** no
    catálogo/lineage. Dataset sem linhagem é dívida — ninguém sabe o que quebra se ele mudar, nem
    onde está o dado do titular.
-9. **Saída durável no archive.** Contratos, DDL/migrations, mapas de pipeline, planos de backfill e
+9. **Cópia de prd → hml/dev NUNCA leva e-mail (nem contato) real.** Todo dump/snapshot/subset/
+   refresh passa pelo mascaramento e nele o **endereço é REESCRITO** — não só ofuscado — pro
+   **domínio de teste em ROTA NULA** (`test.<domain>` com **null MX + SPF `-all` + DMARC
+   `p=reject`**, ou `.test`/`.invalid`/`.example`), **determinístico por HMAC com chave de
+   snapshot** (preserva unicidade e joins; hash sem chave é reidentificável). Reescreve **na saída
+   de prd**, nunca depois de chegar. Mesma regra pra telefone, push token, webhook do cliente e
+   token de PSP. **Fixture/factory/seed/persona/carga só geram `<papel>+<run-id>-<n>@test.<domain>`**
+   — **VETADO** `@gmail.com` e afins, domínio de terceiro, e-mail de pessoa real (inclusive o seu) e
+   o domínio de produção. Expectation em não-prd: **0 linhas com domínio fora da allowlist** →
+   **quarentena**, refresh reprovado. **Por quê:** dataset com e-mail real em ambiente que envia é
+   **incidente esperando o próximo laço** (>5.000 e-mails reais, reputação queimada, **OTP de login**
+   de prd derrubado). Normativa: `schematize-engineering` → `references/efeitos-externos.md`;
+   detalhe em `references/governanca.md` §5.1.
+10. **Saída durável no archive.** Contratos, DDL/migrations, mapas de pipeline, planos de backfill e
    relatórios de qualidade moram em `<project>_archive/data/` (§28), versionados. Nunca só na cabeça.
 
 ## Como se trabalha dados aqui

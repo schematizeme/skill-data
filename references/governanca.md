@@ -79,6 +79,60 @@ copiada pro lake, pro warehouse, pro export. Perder o rótulo na cópia é como 
   analítica sem espalhar o dado bruto.
 - **Dado sintético** pra teste/dev/demo — nunca prod mascarado "às pressas".
 
+### 5.1 Endereço de contato: a cópia prd → hml/dev REESCREVE o e-mail (rota nula)
+
+Recorte de dados do piso **"efeito externo nunca sai de não-produção"** (normativa:
+`schematize-engineering` → `references/efeitos-externos.md`; DNS/rede é a `schematize-infra`).
+Aqui o ponto é só um, e é de dados: **um dataset com e-mail real num ambiente que envia é um
+incidente esperando o próximo laço.** O laço que originou o piso disparou **>5.000 e-mails reais**
+porque a base de hml carregava endereços que **existiam** — reputação de IP/domínio queimada, o
+transacional de **produção** (inclusive o **OTP de login**) parando de chegar, semanas de warm-up.
+Não tem undo, e o gatilho foi **o dado**, não o código.
+
+- **A cópia de prd para hml/dev NUNCA leva e-mail real.** Vale para dump/restore, snapshot,
+  export pro lake, subset "só uns clientes pra testar" e refresh de ambiente — todos passam pelo
+  **mesmo** pipeline de mascaramento (§5), e nele o **endereço é REESCRITO**, junto do resto da PII.
+- **Reescrever ≠ mascarar parcialmente.** `j***@gmail.com` continua apontando pro **domínio real**
+  e volta a ser entregável assim que alguém "descobre" o padrão. O que importa não é ofuscar o
+  caractere: é **trocar o domínio por um em rota nula** — `test.<domain>` (null MX + SPF `-all` +
+  DMARC `p=reject`) ou TLD reservado (`.test`/`.invalid`/`.example`).
+- **Determinístico por hash com chave, pra preservar unicidade e joins:**
+
+  ```
+  email_mascarado = "user+" || hex(HMAC-SHA256(k_snapshot, lower(trim(email_original))))[0:12]
+                           || "@test.<domain>"
+  ```
+
+  - **Determinístico** ⇒ o mesmo endereço vira o mesmo pseudônimo em **todas** as tabelas e
+    datasets do snapshot: `UNIQUE` continua valendo, e o join por e-mail (quando existir) continua
+    fechando. Um `uuid()` aleatório por linha quebraria os dois.
+  - **Com chave (HMAC), não hash puro.** O conjunto de e-mails do mundo é **enumerável**: `sha256`
+    sem chave é reidentificação por dicionário em minutos — pseudonimização de mentira. A chave
+    `k_snapshot` é **por snapshot**, mora no **cofre** e é **descartada** quando a re-linkagem com
+    prd não for necessária (aí a pseudonimização vira anonimização de fato).
+  - **Colisão** é tratada como qualquer chave derivada: 12 hex bytes bastam pro volume típico; se o
+    dataset for grande, aumente o corte em vez de "desempatar" com o endereço original.
+- **Mesma disciplina pro resto do contato**, que é o mesmo bug em outra porta: **telefone** →
+  faixa/magic number de teste do provedor (nunca o número real, nunca "trocando o último dígito");
+  **push token** → descartado; **webhook/callback URL do cliente** → reescrita pro sink interno;
+  **cartão/token de PSP** → token de teste. Reescrever o e-mail e deixar o telefone real é meia
+  cópia limpa.
+- **A reescrita acontece na SAÍDA de prd** — no job de export/dump, antes do dado atravessar a
+  fronteira do ambiente. "Copia agora e mascara depois que chegar em hml" já é **vazamento** (§2) e
+  já deixou a munição carregada no ambiente que envia.
+- **Geradores de fixture, factory, seed, persona, demo e teste de carga produzem SÓ o domínio de
+  teste**, na forma canônica `<papel>+<run-id>-<n>@test.<domain>` — o `+tag` mantém unicidade por
+  execução e deixa o rastro de qual run gerou aquilo. **VETADO** em qualquer artefato de dados:
+  `@gmail.com`/`@hotmail.com`/`@outlook.com` e afins, domínio do cliente/parceiro, e-mail de
+  **pessoa real (inclusive o seu)** e o **domínio de produção** da casa.
+- **É expectation, não boa intenção** (`references/qualidade.md` §3): em dataset de não-produção,
+  a asserção **"0 linhas com domínio de e-mail fora da allowlist de teste"** roda no portão; o que
+  reprova vai pra **quarentena** e o refresh **falha** — dado de contato real em ambiente que envia
+  é **quarentena, não warning**. O mesmo grep trava no CI (`gmail|hotmail|outlook|yahoo|icloud` em
+  `seed*/`, `fixtures/`, `test*/`).
+- **A classificação viaja com a cópia** (§1): a coluna reescrita **continua marcada como PII** no
+  catálogo do ambiente de destino — pseudônimo não é dado anônimo enquanto a chave existir.
+
 ## 6. Lineage & catálogo — nenhum dataset órfão (o piso da rastreabilidade)
 
 - **Catálogo de dados:** todo dataset tem ficha — **nome, dono, classificação, schema/contrato,
