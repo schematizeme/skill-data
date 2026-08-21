@@ -87,7 +87,7 @@ Regras da migration:
 
 ## 5. Segurança e multi-tenancy no store (herdado, §13-15)
 
-- **Deny-by-default e tenant no `WHERE`** (`references/governanca.md`, §15): toda query filtra por
+- **Deny-by-default e tenant no `WHERE`** (`references/governanca.md` §4, *"Acesso — deny-by-default e least-privilege"*): toda query filtra por
   `tenant_id`; **RLS** no Postgres quando couber. Nunca confiar em `tenant_id` do cliente.
 - **Query parametrizada, sempre** (§10/§37): input externo nunca concatenado em SQL.
 - **Cripto em repouso** pra dado pessoal (§32); cache de resposta autenticada segmentado por

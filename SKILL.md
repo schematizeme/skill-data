@@ -2,7 +2,7 @@
 name: schematize-data
 metadata:
   version: 0.2.0
-description: Engenharia de dados da casa — a disciplina, agnóstica de linguagem, que trata o dado como CONTRATO e não como efeito colateral. Rege modelagem e contratos de dados (schema evolutivo, versionamento, compatibilidade back/forward/full, schema registry), pipelines ETL/ELT batch e streaming, event sourcing / CDC (casando com a schematize-engineering: eventos imutáveis, versionados, Transactional Outbox, sem dual-write), qualidade de dados (validação na borda, testes de dados/expectations, quarentena e dead-letter — dado ruim não contamina o downstream), lineage & catálogo (todo dataset rastreável até a origem, nada órfão), particionamento / warehouse / lakehouse, migrations de dados seguras (expand-contract, reversível, nunca drop destrutivo), idempotência e reprocessamento (consumidor idempotente, replay determinístico, exactly-once no efeito) e PII/governança/retention/LGPD (deny-by-default no acesso, base legal + retenção obrigatórias, PII fora de log/URL, mascaramento). Saída durável no `<projeto>_archive/`. Use SEMPRE que for modelar dados, desenhar schema/tabela/tópico/evento, construir ou revisar pipeline (ETL/ELT/streaming/CDC), definir contrato de dados, escrever migration de dados, planejar warehouse/lakehouse/particionamento, tratar qualidade/quarentena/DLQ, lidar com PII/retenção/LGPD, ou reprocessar/dar replay — mesmo sem citar "dados". Contém pisos inegociáveis (dado é contrato — breaking change exige nova versão; deny-by-default no acesso; nada de PII sem base legal e retention; cópia de prd para hml/dev nunca leva e-mail real — o endereço é reescrito para o domínio de teste em rota nula; idempotência e reprocessamento seguros; migration expand-contract reversível; entrega via Outbox, dual-write VETADO; dado ruim vai pra quarentena/DLQ, nunca contamina o downstream; lineage rastreável) que vetam atalhos que corrompem ou vazam dado. Pareia com a schematize-engineering (a BASE: dados-eventos §9-12/§18-19, segurança/LGPD §13-15/§32, observabilidade §16, archive §28, DoD §35); a implementação por stack fica nas skills irmãs (go/rust/elixir/c#/zig/ruby); segurança ofensiva na schematize-pentest.
+description: Engenharia de dados da casa — agnóstica de linguagem, tratando o dado como CONTRATO e não como efeito colateral. Rege modelagem e contratos (schema evolutivo, versionamento, compatibilidade back/forward, schema registry), pipelines ETL/ELT batch e streaming, event sourcing e CDC (eventos imutáveis e versionados, Transactional Outbox, sem dual-write), qualidade (validação na borda, expectations, quarentena e dead-letter — dado ruim não contamina o downstream), lineage e catálogo (nenhum dataset órfão), particionamento/warehouse/lakehouse, migrations de dados seguras (expand-contract, reversível) e PII/governança/retenção/LGPD. Use SEMPRE que for modelar dados, desenhar schema/tabela/tópico/evento, construir ou revisar pipeline, definir contrato, escrever migration de dados, tratar quarentena/DLQ, lidar com PII/retenção ou reprocessar/dar replay. Pisos: dado é contrato (breaking change exige nova versão); deny-by-default no acesso; nada de PII sem base legal e retenção; cópia de prd para hml REESCREVE o e-mail.
 ---
 
 # Engenharia de dados da casa (schematize-data)
@@ -119,6 +119,9 @@ Independente do reference, estes limites nunca são cruzados:
    envia é **incidente esperando o próximo laço** — foi assim que um laço disparou **>5.000
    e-mails reais**, queimou reputação de IP/domínio e derrubaria o **OTP de login** de produção.
    Detalhe: `references/governanca.md` §5.1 e `references/qualidade.md` §3.
+
+   **O gate de máquina:** `scripts/check-external-effects.sh` (distribuído idêntico nesta skill — não é ponteiro para outro repo). Rode-o no CI: ele reprova endereço de caixa real em seed/fixture/persona, chave de provedor não-sandbox em `.env` de não-prd (fail-closed quando o ambiente não está declarado) e domínio de teste sem null MX. O vermelho dele está provado em `scripts/check-external-effects.test.sh`.
+
 10. **Saída durável no archive.** Contratos, DDL/migrations, mapas de pipeline, planos de backfill
    e relatórios de qualidade moram em `<projeto>_archive/data/` (§28), versionados — nunca só na
    cabeça de quem rodou. Sem archive, a decisão de dados não aconteceu.
@@ -138,3 +141,15 @@ Independente do reference, estes limites nunca são cruzados:
   disciplina de dados desenha o deny-by-default; a pentest tenta furá-lo.
 - **schematize-web** — a borda de consumo: dado que chega ao frontend segue o contrato; **segredo
   nunca no bundle**, PII nunca em `localStorage`, decisão de acesso **server-side**.
+- **schematize-database** — a **fronteira mais fácil de errar**, e ela é bilateral. A
+  `schematize-database` é dona do **DESENHO do schema relacional**: entidades → tabelas,
+  normalização 1FN–3FN, **chaves** (PK surrogate ULID/UUIDv7 + chave natural `UNIQUE`), tipo por
+  coluna, `CHECK`/`FOREIGN KEY` com `ON DELETE` consciente, **índices** (compostos, ordem das
+  colunas, parciais) e a migration expand-contract em si. Esta skill é dona do **dado em
+  movimento**: contrato e versionamento, pipeline, CDC/outbox, qualidade/quarentena, lineage,
+  retenção e PII.
+  Regra prática: **"como a tabela é" é `schematize-database`; "como o dado entra, sai, evolui e
+  quem pode vê-lo" é `schematize-data`.** Quem entra por `/data-*` e vai modelar tabela **carrega
+  a `schematize-database` junto** — pipeline novo que cria tabela sem o piso de chaves e índices é
+  dívida no dia 1, e é exatamente onde os dois lados se encontram (a migration de dados desta
+  skill **executa** o schema desenhado lá).

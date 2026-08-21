@@ -128,8 +128,10 @@ Não tem undo, e o gatilho foi **o dado**, não o código.
 - **É expectation, não boa intenção** (`references/qualidade.md` §3): em dataset de não-produção,
   a asserção **"0 linhas com domínio de e-mail fora da allowlist de teste"** roda no portão; o que
   reprova vai pra **quarentena** e o refresh **falha** — dado de contato real em ambiente que envia
-  é **quarentena, não warning**. O mesmo grep trava no CI (`gmail|hotmail|outlook|yahoo|icloud` em
-  `seed*/`, `fixtures/`, `test*/`).
+  é **quarentena, não warning**. O mesmo grep trava no CI — e ele tem nome e caminho: **`scripts/check-external-effects.sh`**
+  (distribuído nesta skill), que varre `seed*/`, `fixtures/`, `test*/`, `*.sql` e `.env*` atrás
+  de `gmail|hotmail|outlook|yahoo|icloud` e afins. *Dizer "o mesmo grep trava no CI" sem
+  apontar qual era o achado D2 da vistoria de 2026-08-21: piso sem endereço não é gate.*
 - **A classificação viaja com a cópia** (§1): a coluna reescrita **continua marcada como PII** no
   catálogo do ambiente de destino — pseudônimo não é dado anônimo enquanto a chave existir.
 
