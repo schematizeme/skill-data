@@ -4,6 +4,11 @@ Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https:
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
 
+## [0.5.0] — 2026-08-21
+
+### Adicionado
+- **`pipelines.md` §7.1 — Orquestração.** A skill exigia backfill com plano, checkpoint e replay determinístico **sem dizer em que isso roda** — e sem orquestrador declarado o pipeline vira `cron` + script, com as três exigências existindo só na cabeça de quem escreveu. Entraram **o que a casa exige do orquestrador** (estado durável das execuções — *sem ele não existe replay determinístico, existe rodar de novo e torcer*; idempotência por **janela**, não pelo relógio; retry com teto e DLQ; **dependência explícita** em vez de encadeamento por horário; backfill de primeira classe com limite de concorrência; observabilidade com SLA de dado) e o rol com o encaixe de cada um (**Dagster**, **Airflow** — com a cautela de que *DAG é código que roda no import* —, **Prefect**, **Temporal**, e **cron + script** para tarefa única, assumindo que **não há replay**). Fecha com a fronteira que mais confunde: *Temporal resolve durabilidade de execução de **negócio**; Dagster/Airflow/Prefect resolvem orquestração de **dados***.
+
 ## [0.4.0] — 2026-08-21
 Segunda leva do saneamento: as contradições e a lacuna de ferramenta do inventário da vistoria.
 

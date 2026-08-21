@@ -109,6 +109,42 @@ Reprocessar (novo consumidor, correção de bug, backfill de campo, reconstruç�
   Reprocessar dado ≠ re-executar side effects. Confundir os dois é o jeito clássico de transformar
   um replay em incidente de produção.
 
+## 7.1 Orquestração — quem dispara, retenta e sabe o que já rodou
+
+A skill exige **backfill com plano, checkpoint e replay determinístico** (§2, §7) e não dizia **em
+que** isso roda. Sem orquestrador declarado, o pipeline vira `cron` + script, e as três coisas que a
+skill exige passam a existir só na cabeça de quem escreveu.
+
+**O que a casa exige do orquestrador** (isto é o piso; a ferramenta é escolha com ADR):
+
+- **Estado durável das execuções:** quais rodaram, com que parâmetro, em que janela, com que
+  resultado. Sem isso não existe "replay determinístico" — existe rodar de novo e torcer.
+- **Idempotência por unidade de trabalho** (dag-run/task-run identificado pela **janela**, não pelo
+  relógio de quando disparou). É o que faz `backfill` e `retry` não duplicarem.
+- **Retry com backoff e teto** — e **DLQ/alerta** quando estoura (§5). Retry infinito é VETADO na
+  base.
+- **Dependência explícita entre tarefas** (grafo), não encadeamento por horário: *"roda às 3h porque
+  o outro roda às 2h" é acoplamento por relógio, e ele quebra no dia em que o de cima atrasa.*
+- **Backfill de primeira classe:** disparar uma janela histórica **sem** editar código, com limite
+  de concorrência (senão o backfill derruba a fonte).
+- **Observabilidade:** duração, atraso (*lag*) e taxa de falha por tarefa, com alerta de **SLA de
+  dado** (§8) — não só "o job falhou".
+
+**O rol, e onde cada um encaixa** (a decisão é ADR, e o critério é o formato do problema):
+
+| Ferramenta | Encaixa quando | Cautela |
+|---|---|---|
+| **Dagster** | o pipeline é sobre **assets de dados** (tabela, modelo, arquivo) e você quer linhagem e materialização por asset | opinativo; vale quando o time compra o modelo mental de asset |
+| **Airflow** | grafo de tarefas clássico, muita integração pronta, time que já o conhece | estado no scheduler; DAG é código Python que **roda no import** — lógica pesada no topo do arquivo derruba o scheduler |
+| **Prefect** | fluxo em Python que quer ser código normal, com retry/observabilidade acoplados | menos ecossistema de operador pronto |
+| **Temporal** | **workflow de negócio** durável (dias/semanas, com espera humana, saga, compensação) | **não é orquestrador de dados**: usá-lo para ETL em lote é caro e desconfortável |
+| **cron + script** | tarefa **única**, sem dependência, sem backfill | *sem* estado durável: assume-se que **não há** replay — e isso vira dívida no primeiro incidente |
+
+**A fronteira que confunde:** **Temporal** resolve *durabilidade de execução de negócio*;
+**Dagster/Airflow/Prefect** resolvem *orquestração de pipeline de dados*. Escolher pelo hype é como
+o time acaba com um workflow engine transportando parquet — ou com um DAG de dados tentando esperar
+a aprovação de um humano por três dias.
+
 ## 8. Observabilidade do pipeline (§16)
 
 Todo pipeline nasce instrumentado: **lag** do consumidor, throughput, taxa de erro, tamanho da
