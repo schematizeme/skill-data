@@ -4,6 +4,13 @@ Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https:
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
 
+## [0.4.0] — 2026-08-21
+Segunda leva do saneamento: as contradições e a lacuna de ferramenta do inventário da vistoria.
+
+### Corrigido
+- **"Backward permite remover campo" × "remover campo é breaking change"** — a contradição era de **pergunta**, não de regra: a matriz de `contratos.md` §4 responde *"o schema novo lê o dado velho?"* (e o registry aprova a remoção, porque o **leitor** não pede mais o campo); o piso 1 responde *"algum consumidor ainda lê isso?"* — e o registry **não sabe**. Ficou escrito que **`BACKWARD` é condição necessária, não suficiente**: remover exige **inventário de consumidores medido**, janela de depreciação e `v2` se alguém não migrou. *"Achei que ninguém usava" é a frase que precede o incidente de dados.*
+- **`dual-write` deixou de significar duas coisas.** O piso 2 passou a dizer **"dual-write ENTRE SISTEMAS é VETADO"** (banco + broker sem transação comum), e o `armazenamento.md` diz **"dual-write na mesma transação, no mesmo banco"** na fase Migrate — *que é o oposto do problema, e é por isso que o expand/contract funciona*.
+
 ## [0.3.0] — 2026-08-21
 Saneamento do catálogo conforme a vistoria de 2026-08-21.
 

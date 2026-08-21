@@ -1,7 +1,7 @@
 ---
 name: schematize-data
 metadata:
-  version: 0.3.0
+  version: 0.4.0
 description: Engenharia de dados da casa — agnóstica de linguagem, tratando o dado como CONTRATO e não como efeito colateral. Rege modelagem e contratos (schema evolutivo, versionamento, compatibilidade back/forward, schema registry), pipelines ETL/ELT batch e streaming, event sourcing e CDC (eventos imutáveis e versionados, Transactional Outbox, sem dual-write), qualidade (validação na borda, expectations, quarentena e dead-letter — dado ruim não contamina o downstream), lineage e catálogo (nenhum dataset órfão), particionamento/warehouse/lakehouse, migrations de dados seguras (expand-contract, reversível) e PII/governança/retenção/LGPD. Use SEMPRE que for modelar dados, desenhar schema/tabela/tópico/evento, construir ou revisar pipeline, definir contrato, escrever migration de dados, tratar quarentena/DLQ, lidar com PII/retenção ou reprocessar/dar replay. Pisos: dado é contrato (breaking change exige nova versão); deny-by-default no acesso; nada de PII sem base legal e retenção; cópia de prd para hml REESCREVE o e-mail.
 ---
 
@@ -18,7 +18,7 @@ versionados, Outbox, migrations reversíveis, LGPD, observabilidade); esta skill
 disciplina de engenharia de dados** — contratos evolutivos, pipelines batch/streaming, CDC,
 qualidade com quarentena, lineage, lakehouse e governança de PII — pra rodar como corpo próprio.
 
-**Versão:** skill `schematize-data` v0.3.0. Changelog em `CHANGELOG.md`.
+**Versão:** skill `schematize-data` v0.4.0. Changelog em `CHANGELOG.md`.
 
 ## Comandos (Claude Code)
 
@@ -76,9 +76,13 @@ Independente do reference, estes limites nunca são cruzados:
    versionado**. Adicionar campo **opcional com default** é evolutivo; **remover/renomear/mudar
    tipo** é quebra — exige `v2` e **janela de coexistência** documentada. Consumidores **ignoram
    campo desconhecido** (forward-compatible). Quebrar contrato sem versão é **VETADO**.
-2. **Entrega via Outbox — dual-write é VETADO.** Publicar evento/mudança e gravar no banco **no
-   mesmo fluxo** sem transação (dual-write) corrompe consistência. Use **Transactional Outbox**
-   (ou CDC do log do banco). Todo consumidor tem **DLQ**; retry é limitado, com backoff — **retry
+2. **Entrega via Outbox — dual-write ENTRE SISTEMAS é VETADO.** Gravar no banco **e** publicar o
+   evento no broker no mesmo fluxo, **sem transação que cubra os dois**, corrompe consistência: um
+   dos lados falha e ninguém sabe qual. Use **Transactional Outbox** (ou CDC do log do banco).
+   *(O termo é sobrecarregado, e a diferença importa: **escrever nas duas colunas/tabelas do MESMO
+   banco, na MESMA transação**, durante uma migração expand/contract — o que `armazenamento.md` e a
+   `schematize-database` chamam de "dual-write" na fase Migrate — **é o padrão correto**, não o
+   vetado. O que se veta é o dual-write **sem transação comum**, entre sistemas diferentes.)* Todo consumidor tem **DLQ**; retry é limitado, com backoff — **retry
    infinito é proibido** (base §9/§18).
 3. **Idempotência e reprocessamento seguros.** Consumidor/job é **idempotente** (rodar 2x não
    corrompe — dedupe por id do evento/chave natural). Todo pipeline suporta **replay

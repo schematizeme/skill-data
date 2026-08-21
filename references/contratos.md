@@ -63,7 +63,7 @@ Compatibilidade é sobre **quem consegue ler o quê** depois da mudança. Três 
 
 | Modo | Garante | Quem se protege | Regra prática |
 |---|---|---|---|
-| **Backward** | consumidor **novo** lê dado **antigo** | o **consumidor** | pode **adicionar campo opcional/ com default**; pode **remover** campo obrigatório |
+| **Backward** | consumidor **novo** lê dado **antigo** | o **consumidor** | pode **adicionar campo opcional/com default**; pode **remover** campo — mas **ler a nota abaixo antes** |
 | **Forward** | consumidor **antigo** lê dado **novo** | o **produtor** pode andar na frente | pode **adicionar** campo (o velho ignora o desconhecido); **não** pode remover campo que o velho exige |
 | **Full** | os dois ao mesmo tempo | ambos | só **adicionar campo opcional com default** e **remover campo opcional** |
 
@@ -82,6 +82,22 @@ no registry:
 > A mudança **silenciosa de semântica** é a mais perigosa: o schema continua "válido", os testes de
 > forma passam, e o consumidor lê `amount` achando que é bruto quando virou líquido. Semântica faz
 > parte do contrato — mudou o significado, mudou a versão.
+
+> **"Backward permite remover campo" e "remover campo é breaking change" não se contradizem — são
+> duas perguntas diferentes, e confundi-las quebra produção.**
+>
+> - A **matriz acima é a regra do REGISTRY**: ela responde *"o schema novo consegue ler o dado
+>   escrito com o schema velho?"*. Remover um campo passa nessa checagem, porque o **leitor** novo
+>   simplesmente não pede mais aquele campo. O registry aprova.
+> - O **piso da casa** (piso 1 do `SKILL.md`, *"Dado é contrato"*) responde outra coisa: *"algum consumidor lá fora ainda lê
+>   esse campo?"*. Se sim, remover **quebra**, e o registry **não sabe disso** — ele valida schema
+>   contra schema, não schema contra a realidade dos consumidores.
+>
+> **A regra que vale:** o `BACKWARD` do registry é **condição necessária, não suficiente**. Remover
+> ou renomear campo exige, além do verde do registry: **inventário de consumidores** (quem lê, medido
+> — não presumido), **janela de depreciação** anunciada, e `v2` quando houver consumidor que não
+> migrou. Sem inventário, trate como quebra: *"achei que ninguém usava" é a frase que precede o
+> incidente de dados*.
 
 ## 5. Schema registry — o contrato como código, verificado no CI
 

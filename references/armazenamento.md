@@ -65,11 +65,16 @@ ainda não subiu (ou o que já está de saída) quebra. Faça **expand → migra
 
 1. **Expand (aditivo, compatível):** adicione o novo (coluna/tabela/campo) **opcional, com default**
    — nada quebra, código velho e novo coexistem (`references/contratos.md`, compat backward).
-2. **Migrate (backfill + dual-write):** popule o novo a partir do velho (**backfill** em janelas,
+2. **Migrate (backfill + dual-write **na mesma transação, no mesmo banco**):** popule o novo a partir do velho (**backfill** em janelas,
    idempotente, `pipelines.md`); o código passa a **escrever nos dois** durante a transição.
 3. **Contract (corta o velho — só quando ninguém lê):** quando **todo** leitor migrou (o
    **lineage/catálogo** confirma quem lê, `governanca.md`) e o backfill fechou, remova o antigo.
    Só aqui o `DROP` acontece — em passo separado, deployado depois, reversível.
+
+   > *Este dual-write **não é o dual-write vetado**.* O que a `schematize-data` veta (piso 2) é
+   > escrever em **dois sistemas** (banco + broker) sem transação que cubra os dois. Aqui as duas
+   > escritas vivem **no mesmo banco e na mesma transação**: ou as duas acontecem, ou nenhuma. É o
+   > oposto do problema — e é por isso que o expand/contract funciona.
 
 Regras da migration:
 
