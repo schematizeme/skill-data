@@ -40,7 +40,7 @@ unzip skill-data.zip -d .claude/skills/
 
 ## O que tem dentro
 
-- **SKILL.md** — o contrato: 9 pisos inegociáveis (dado é contrato → nova versão pra breaking
+- **SKILL.md** — o contrato: 10 pisos inegociáveis (dado é contrato → nova versão pra breaking
   change; Outbox sem dual-write; idempotência/replay seguros; dado ruim vai pra quarentena;
   migration expand-contract reversível; deny-by-default no acesso; nada de PII sem base legal e
   retenção; lineage rastreável; saída durável no archive) + mapa de references.

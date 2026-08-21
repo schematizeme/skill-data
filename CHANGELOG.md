@@ -1,6 +1,16 @@
 # Changelog — schematize-data
 
-Formato: [Keep a Changelog](https://keepachangelog.com/pt-BR/). Versionamento semântico.
+Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
+com versionamento [SemVer](https://semver.org/lang/pt-BR/).
+
+
+## [0.3.0] — 2026-08-21
+Saneamento do catálogo conforme a vistoria de 2026-08-21.
+
+### Mudado
+- `scripts/check-external-effects.sh` (+ teste) atualizado para a versão distribuída do gate de efeito externo — **md5 idêntico nas 17 skills** que o carregam (ADR-0008).
+- `install.sh` regenerado do template único: **exclui `*.zip`** do pacote instalado, **poda comando removido** e instala hooks.
+- README com a contagem de pisos corrigida (9 → 10, conferida contra o `SKILL.md`) — hoje verificada pela regra `contagem` do lint do catálogo.
 
 ## [0.2.0] — 2026-08-20
 

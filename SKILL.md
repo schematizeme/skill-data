@@ -1,7 +1,7 @@
 ---
 name: schematize-data
 metadata:
-  version: 0.2.0
+  version: 0.3.0
 description: Engenharia de dados da casa — agnóstica de linguagem, tratando o dado como CONTRATO e não como efeito colateral. Rege modelagem e contratos (schema evolutivo, versionamento, compatibilidade back/forward, schema registry), pipelines ETL/ELT batch e streaming, event sourcing e CDC (eventos imutáveis e versionados, Transactional Outbox, sem dual-write), qualidade (validação na borda, expectations, quarentena e dead-letter — dado ruim não contamina o downstream), lineage e catálogo (nenhum dataset órfão), particionamento/warehouse/lakehouse, migrations de dados seguras (expand-contract, reversível) e PII/governança/retenção/LGPD. Use SEMPRE que for modelar dados, desenhar schema/tabela/tópico/evento, construir ou revisar pipeline, definir contrato, escrever migration de dados, tratar quarentena/DLQ, lidar com PII/retenção ou reprocessar/dar replay. Pisos: dado é contrato (breaking change exige nova versão); deny-by-default no acesso; nada de PII sem base legal e retenção; cópia de prd para hml REESCREVE o e-mail.
 ---
 
@@ -18,7 +18,7 @@ versionados, Outbox, migrations reversíveis, LGPD, observabilidade); esta skill
 disciplina de engenharia de dados** — contratos evolutivos, pipelines batch/streaming, CDC,
 qualidade com quarentena, lineage, lakehouse e governança de PII — pra rodar como corpo próprio.
 
-**Versão:** skill `schematize-data` v0.2.0. Changelog em `CHANGELOG.md`.
+**Versão:** skill `schematize-data` v0.3.0. Changelog em `CHANGELOG.md`.
 
 ## Comandos (Claude Code)
 
