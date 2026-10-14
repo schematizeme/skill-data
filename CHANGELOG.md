@@ -13,6 +13,9 @@ Fronteira data x database decidida.
 - `description` em `>-` (YAML antes inválido) com 350 caracteres ou menos.
 - **Description** reduzida (~270 chars) para caber no orçamento de listagem (soma das 31 skills ≤ 8500; o Claude Code corta a listagem acima disso).
 
+### Alterado
+- `scripts/check-external-effects{,.test}.sh` viram arquivos herdados da engineering (cabeçalho "herdado de schematize-engineering — não edite aqui"); conteúdo inalterado.
+
 ## [0.5.0] — 2026-08-21
 
 ### Adicionado
