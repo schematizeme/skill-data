@@ -11,6 +11,7 @@ Fronteira data x database decidida.
 - `references/armazenamento.md` §4 e `SKILL.md` (item 4, piso 5): o expand-contract do DDL é da `schematize-database → references/migrations.md`; aqui ficou migração/backfill de dados (lotes, reversível, só contrai sem leitor via lineage).
 - `references/governanca.md`: ponteiro para a marca da coluna PII no DDL (`schematize-database → references/seguranca-pii.md`); base legal, retenção e LGPD ficam aqui.
 - `description` em `>-` (YAML antes inválido) com 350 caracteres ou menos.
+- **Description** reduzida (~270 chars) para caber no orçamento de listagem (soma das 31 skills ≤ 8500; o Claude Code corta a listagem acima disso).
 
 ## [0.5.0] — 2026-08-21
 

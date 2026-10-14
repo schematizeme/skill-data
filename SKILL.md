@@ -3,7 +3,9 @@ name: schematize-data
 metadata:
   version: 0.5.0
 description: >-
-  Engenharia de dados da casa (agnóstica de linguagem): dado como contrato, pipelines ETL/ELT, eventos/CDC/outbox, qualidade e quarentena, lineage, warehouse, migração de dados e governança (PII, retenção, LGPD). Use ao desenhar pipeline, contrato, tópico/evento, DLQ, backfill ou tratar PII. DDL do schema: schematize-database.
+  Engenharia de dados, agnóstica de linguagem: dado como contrato, pipelines ETL/ELT, eventos/CDC/outbox, qualidade e
+  quarentena, lineage e governança (PII, retenção, LGPD). Use ao desenhar pipeline, contrato, evento, DLQ, backfill
+  ou tratar PII. DDL: schematize-database.
 ---
 
 # Engenharia de dados da casa (schematize-data)
