@@ -4,8 +4,7 @@ metadata:
   version: 0.6.0
 description: >-
   Engenharia de dados, agnóstica de linguagem: dado como contrato, pipelines ETL/ELT, eventos/CDC/outbox, qualidade e
-  quarentena, lineage e governança (PII, retenção, LGPD). Use ao desenhar pipeline, contrato, evento, DLQ, backfill
-  ou tratar PII. DDL: schematize-database.
+  quarentena, lineage, PII/LGPD. Use ao desenhar pipeline, contrato, DLQ ou backfill. DDL: schematize-database.
 ---
 
 # Engenharia de dados da casa (schematize-data)
