@@ -39,6 +39,10 @@ copiada pro lake, pro warehouse, pro export. Perder o rótulo na cópia é como 
 - **PII em cache só cifrada** (§11); em repouso, **cripto** (§13); em trânsito, **TLS 1.2+**.
 - **Nunca PII de produção em ambiente de teste/dev sem anonimizar.** Dump de prod pra dev é
   vazamento agendado — mascare/gere sintético.
+- **Evento de analytics de produto é coleta na origem:** o evento nasce com finalidade, propriedades
+  fechadas e base legal; consentimento e modo sem cookie são decididos **antes** do SDK disparar, não
+  limpos depois no warehouse. Piso aqui; o desenho (tracking plan, consentimento, revogação) é da
+  `schematize-analytics → references/consentimento-lgpd.md` e `references/plano-de-tracking.md`.
 
 ## 3. Retenção — o dado tem prazo de validade
 
