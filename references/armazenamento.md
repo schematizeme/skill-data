@@ -2,8 +2,8 @@
 
 > Onde o dado **pousa** e como ele **muda de forma sem quebrar**. Este reference cobre a escolha do
 > store, o **particionamento**, a arquitetura de **warehouse/lakehouse** (bronze/silver/gold) e o
-> piso mais perigoso do dia a dia de dados: **migration de dado vivo é expand-contract e
-> reversível** — nunca um `DROP`/rename destrutivo num passo só.
+> piso mais perigoso do dia a dia de dados: **migração e backfill de dado vivo são planejados e
+> reversíveis**. O DDL/expand-contract do schema é da `schematize-database`.
 
 Casa com a base (`schematize-engineering` §10 banco): migrations versionadas e **reversíveis**,
 schema por serviço, sem join cross-service, timestamps **UTC**, IDs **UUIDv7/ULID**, query
@@ -57,38 +57,14 @@ Padrão ELT em camadas, cada uma um contrato:
 - **Compaction/manutenção:** compacte small-files, expire snapshots antigos conforme retenção, colete
   metadados. Lake sem manutenção degrada até parar.
 
-## 4. Migration de dado vivo — expand-contract (o piso)
+## 4. Migração e backfill de DADO vivo
 
-Mudar o schema de uma tabela/dataset que **está sendo lido e escrito** não pode parar o serviço nem
-perder dado. Nunca faça `ALTER ... DROP COLUMN`/rename num passo só sobre dado vivo — o deploy que
-ainda não subiu (ou o que já está de saída) quebra. Faça **expand → migrate → contract**:
+O **DDL** do schema (expand → migrate → contract, constraints, `down` da migration, índice sem downtime) é da `schematize-database → references/migrations.md`; esta skill não o repete. Aqui é o **dado** que se move:
 
-1. **Expand (aditivo, compatível):** adicione o novo (coluna/tabela/campo) **opcional, com default**
-   — nada quebra, código velho e novo coexistem (`references/contratos.md`, compat backward).
-2. **Migrate (backfill + dual-write **na mesma transação, no mesmo banco**):** popule o novo a partir do velho (**backfill** em janelas,
-   idempotente, `pipelines.md`); o código passa a **escrever nos dois** durante a transição.
-3. **Contract (corta o velho — só quando ninguém lê):** quando **todo** leitor migrou (o
-   **lineage/catálogo** confirma quem lê, `governanca.md`) e o backfill fechou, remova o antigo.
-   Só aqui o `DROP` acontece — em passo separado, deployado depois, reversível.
-
-   > *Este dual-write **não é o dual-write vetado**.* O que a `schematize-data` veta (piso 2) é
-   > escrever em **dois sistemas** (banco + broker) sem transação que cubra os dois. Aqui as duas
-   > escritas vivem **no mesmo banco e na mesma transação**: ou as duas acontecem, ou nenhuma. É o
-   > oposto do problema — e é por isso que o expand/contract funciona.
-
-Regras da migration:
-
-- **Reversível:** todo passo tem **`down`** testado (aplica **e** reverte, §10). Migration só com
-  `up` é VETADA. "Rodei em dev uma vez" não é teste de rollback.
-- **Rename = adiciona novo + backfill + dual-write + corta velho.** Nunca `RENAME` direto em dado
-  vivo com consumidor — é uma quebra de contrato disfarçada.
-- **Mudança de tipo = nova coluna + backfill convertido + corta.** Alterar tipo in-place trava a
-  tabela e/ou quebra o leitor.
-- **Backfill grande é operação planejada:** em **lotes** (não um `UPDATE` de milhões que trava a
-  tabela), com throttle, idempotente, monitorado, **reversível** e registrado (plano no archive).
-- **Índice sem downtime:** crie concorrente (`CREATE INDEX CONCURRENTLY`), valide, depois use.
-- **Zero-downtime como default:** a ordem expand-contract existe justamente pra o deploy poder ser
-  gradual (blue/green, rolling) sem janela de manutenção.
+- **Backfill grande é operação planejada:** em **lotes** (não um `UPDATE` de milhões que trava a tabela), com throttle, idempotente, monitorado, **reversível** (como desfazer/reprocessar) e registrado (plano no archive).
+- **Só contrai quando ninguém lê:** o **lineage/catálogo** (`governanca.md`) confirma que todo leitor migrou antes de o campo/dataset velho sair; compat de contrato em `contratos.md`.
+- **Dual-write só dentro do mesmo banco e da mesma transação.** O dual-write vetado (piso 2) é escrever em **dois sistemas** (banco + broker) sem transação que cubra os dois.
+- **Zero-downtime como default:** deploy gradual (blue/green, rolling) sem janela de manutenção.
 
 ## 5. Segurança e multi-tenancy no store (herdado, §13-15)
 

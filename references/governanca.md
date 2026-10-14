@@ -20,6 +20,8 @@ Todo dado é classificado (§32). Sem rótulo, não há política aplicável:
 | **Pessoal (PII)** | nome, e-mail, CPF, telefone, IP | **base legal + retenção + minimização** |
 | **Pessoal sensível** | saúde, biometria, origem, financeiro | tudo do PII **+** cripto forte, acesso restrito, DPIA |
 
+A **marca da coluna PII no DDL** (comentário, mecanismo de expurgo, PII fora de índice) é da `schematize-database → references/seguranca-pii.md`; a classificação, a base legal e a retenção são daqui.
+
 A classificação **viaja com o dado** (metadado no catálogo): uma coluna PII continua PII quando
 copiada pro lake, pro warehouse, pro export. Perder o rótulo na cópia é como perde-se o controle.
 

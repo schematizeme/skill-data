@@ -2,7 +2,8 @@
 name: schematize-data
 metadata:
   version: 0.5.0
-description: Engenharia de dados da casa — agnóstica de linguagem, tratando o dado como CONTRATO e não como efeito colateral. Rege modelagem e contratos (schema evolutivo, versionamento, compatibilidade back/forward, schema registry), pipelines ETL/ELT batch e streaming, event sourcing e CDC (eventos imutáveis e versionados, Transactional Outbox, sem dual-write), qualidade (validação na borda, expectations, quarentena e dead-letter — dado ruim não contamina o downstream), lineage e catálogo (nenhum dataset órfão), particionamento/warehouse/lakehouse, migrations de dados seguras (expand-contract, reversível) e PII/governança/retenção/LGPD. Use SEMPRE que for modelar dados, desenhar schema/tabela/tópico/evento, construir ou revisar pipeline, definir contrato, escrever migration de dados, tratar quarentena/DLQ, lidar com PII/retenção ou reprocessar/dar replay. Pisos: dado é contrato (breaking change exige nova versão); deny-by-default no acesso; nada de PII sem base legal e retenção; cópia de prd para hml REESCREVE o e-mail.
+description: >-
+  Engenharia de dados da casa (agnóstica de linguagem): dado como contrato, pipelines ETL/ELT, eventos/CDC/outbox, qualidade e quarentena, lineage, warehouse, migração de dados e governança (PII, retenção, LGPD). Use ao desenhar pipeline, contrato, tópico/evento, DLQ, backfill ou tratar PII. DDL do schema: schematize-database.
 ---
 
 # Engenharia de dados da casa (schematize-data)
@@ -50,8 +51,8 @@ Os comandos ficam em `assets/commands/` e são instalados em `.claude/commands/`
    teste o dado (não só o código), e **quarentene** o que reprova. Dado ruim vai pra
    quarentena/DLQ com trilha — nunca contamina o downstream, nunca some em silêncio.
 4. **Armazene e migre com segurança** (`references/armazenamento.md`): particionamento,
-   warehouse/lakehouse e **migrations expand-contract** reversíveis — nunca um `DROP`/rename
-   destrutivo num passo só.
+   warehouse/lakehouse e **migração/backfill de dados** reversíveis; o DDL do schema (expand-contract) é da
+   `schematize-database → references/migrations.md`.
 5. **Governe** (`references/governanca.md`): **deny-by-default** no acesso; PII só com **base
    legal + retenção**; PII fora de log/URL; **lineage & catálogo** pra todo dataset ser rastreável.
 6. **Não trabalhe de memória** — as regras, os cruzamentos e o que conta como "seguro" estão nos
@@ -64,7 +65,7 @@ Mapa de references — leia o que casa com a tarefa:
 | Modelar dado, definir **contrato**, schema evolutivo, versionamento, compatibilidade (back/forward/full), schema registry, política de mudança | `references/contratos.md` |
 | Construir **pipeline** ETL/ELT (batch e streaming), event sourcing / CDC, idempotência, reprocessamento/replay, Outbox, backpressure, DLQ | `references/pipelines.md` |
 | **Qualidade** de dados: validação na borda, testes de dados/expectations, quarentena, dead-letter, SLA/contrato de qualidade, deteção de deriva | `references/qualidade.md` |
-| **Armazenamento**: particionamento, warehouse/lakehouse (bronze/silver/gold), formato/layout, **migrations de dados** expand-contract seguras | `references/armazenamento.md` |
+| **Armazenamento**: particionamento, warehouse/lakehouse (bronze/silver/gold), formato/layout, **migração e backfill de dados** seguros | `references/armazenamento.md` |
 | **Governança**: PII/LGPD, base legal, retenção, deny-by-default no acesso, mascaramento/anonimização, **lineage & catálogo** | `references/governanca.md` |
 
 ## Pisos inegociáveis (vetam o atalho)
@@ -92,10 +93,9 @@ Independente do reference, estes limites nunca são cruzados:
    contrato/expectativa vai pra **quarentena** (dead-letter de dados) com motivo e origem — nunca
    entra no dataset "bom", nunca some em silêncio. Falha de qualidade **alerta** (§16), não é
    engolida.
-5. **Migration de dados é expand-contract e reversível.** Mudança de schema em dado vivo segue
-   **expand → migrate → contract** (adiciona o novo, backfill, corta o velho só quando ninguém lê),
-   cada passo com **`down`** testado (aplica e reverte). `DROP`/rename destrutivo num passo só, ou
-   backfill sem plano de rollback, são **VETADOS**. Timestamps em **UTC**; IDs **UUIDv7/ULID**.
+5. **Migração/backfill de dados é reversível e em lotes.** O expand-contract do schema é da
+   `schematize-database → references/migrations.md`; aqui, backfill sem plano de rollback ou que só
+   corta o velho com leitor ainda ativo (lineage) é **VETADO**. Timestamps em **UTC**; IDs **UUIDv7/ULID**.
 6. **Deny-by-default no acesso ao dado.** Acesso a dataset/tabela/tópico é **negado por padrão** e
    concedido por necessidade (least-privilege), derivado do token **server-side** e por
    **tenant** (`WHERE tenant_id`, RLS quando couber — base §15). Confiar em `tenant_id`/role vindo
@@ -149,7 +149,7 @@ Independente do reference, estes limites nunca são cruzados:
   `schematize-database` é dona do **DESENHO do schema relacional**: entidades → tabelas,
   normalização 1FN–3FN, **chaves** (PK surrogate ULID/UUIDv7 + chave natural `UNIQUE`), tipo por
   coluna, `CHECK`/`FOREIGN KEY` com `ON DELETE` consciente, **índices** (compostos, ordem das
-  colunas, parciais) e a migration expand-contract em si. Esta skill é dona do **dado em
+  colunas, parciais) e a migration expand-contract do schema. Esta skill é dona do **dado em
   movimento**: contrato e versionamento, pipeline, CDC/outbox, qualidade/quarentena, lineage,
   retenção e PII.
   Regra prática: **"como a tabela é" é `schematize-database`; "como o dado entra, sai, evolui e
