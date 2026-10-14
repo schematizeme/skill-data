@@ -1,0 +1,12 @@
+slug = "data"
+name = "schematize-data"
+tag = "Disciplina · Dados"
+status = "beta"
+order = 14
+current_version = "0.7.0"
+href = "/data"
+
+[descriptions]
+pt = "Engenharia de dados da casa: trata o dado como CONTRATO — schema versionado com compatibilidade (back/forward/full), pipelines ETL/ELT batch e streaming, event sourcing/CDC via Outbox (dual-write vetado), qualidade com quarentena e dead-letter (dado ruim não contamina o downstream), lineage & catálogo, migrations expand-contract reversíveis, idempotência/replay e governança de PII (deny-by-default, base legal + retenção, LGPD)."
+en = "House data engineering: treats data as a CONTRACT — versioned schema with compatibility (back/forward/full), batch and streaming ETL/ELT pipelines, event sourcing/CDC via Outbox (dual-write forbidden), quality with quarantine and dead-letter (bad data never contaminates downstream), lineage & catalog, reversible expand-contract migrations, idempotency/replay and PII governance (deny-by-default, legal basis + retention, GDPR/LGPD)."
+es = "Ingeniería de datos de la casa: trata el dato como CONTRATO — esquema versionado con compatibilidad (back/forward/full), pipelines ETL/ELT batch y streaming, event sourcing/CDC vía Outbox (dual-write vetado), calidad con cuarentena y dead-letter (el dato malo no contamina el downstream), lineage & catálogo, migraciones expand-contract reversibles, idempotencia/replay y gobernanza de PII (deny-by-default, base legal + retención, RGPD/LGPD)."

@@ -3,7 +3,7 @@ name = "schematize-data"
 tag = "Disciplina · Dados"
 status = "beta"
 order = 14
-current_version = "0.6.1"
+current_version = "0.7.0"
 href = "/data"
 
 [descriptions]
