@@ -1,7 +1,7 @@
 ---
 name: schematize-data
 metadata:
-  version: 0.7.0
+  version: 0.8.0
 description: >-
   Engenharia de dados: dado como contrato, pipelines ETL/ELT, eventos/CDC/outbox, qualidade, lineage, PII/LGPD. Use ao desenhar pipeline, DLQ ou backfill. DDL: schematize-database.
 ---
@@ -19,7 +19,7 @@ versionados, Outbox, migrations reversíveis, LGPD, observabilidade); esta skill
 disciplina de engenharia de dados** — contratos evolutivos, pipelines batch/streaming, CDC,
 qualidade com quarentena, lineage, lakehouse e governança de PII — pra rodar como corpo próprio.
 
-**Versão:** skill `schematize-data` v0.7.0. Changelog em `CHANGELOG.md`.
+**Versão:** skill `schematize-data` v0.8.0. Changelog em `CHANGELOG.md`.
 
 ## Comandos (Claude Code)
 
