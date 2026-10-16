@@ -168,6 +168,10 @@ Independente do reference, estes limites nunca são cruzados:
   agnóstica: define o contrato, o pipeline, a migration e a governança; **o código** (o consumidor,
   o job, o worker de CDC, a migration executável) roda no gate daquela linguagem
   (`/<slug>-review`, testes, lint). O piso de dados é o mesmo em qualquer stack.
+- **schematize-regression** — a **regressão de dados**: dataset/contrato que voltou a quebrar, backfill
+  que reintroduz erro já corrigido. As expectations e a quarentena são desta skill; o teste que
+  impede o MESMO defeito de dado de voltar segue o ciclo de `schematize-regression` →
+  `references/contrato-dados-ia.md`.
 - **schematize-analytics** — o **evento de produto** na origem: tracking plan como contrato,
   consentimento e modo sem cookie (`schematize-analytics → references/consentimento-lgpd.md`,
   `references/plano-de-tracking.md`). Esta skill leva o evento depois que ele nasceu certo (contrato,

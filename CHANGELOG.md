@@ -4,6 +4,12 @@ Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https:
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
 
+## [0.8.0] — 2026-10-15
+### Alterado
+- Relação com outras skills e `references/qualidade.md` §3 apontam para `schematize-regression` (regressão
+  de dados: expectation do defeito corrigido entra vista vermelha). Expectations e quarentena seguem aqui.
+- Porquê: fronteira explícita, sem duplicar conteúdo.
+
 ## [0.7.0] — 2026-10-14
 Integração com as 8 skills novas (skill-dev, iam, api, payments, postgres, incident, analytics, git) e saneamento pelo gate novo.
 

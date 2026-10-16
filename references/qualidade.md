@@ -53,6 +53,9 @@ Qualidade de dado não é uma coisa só. Cubra as dimensões e declare o **esper
   **quarentena** e **refresh reprovado**, nunca warning — é ele que vira o disparo em massa no
   próximo laço (`references/governanca.md` §5.1).
 
+> Bug de dado já corrigido não pode voltar: a expectation que o pegaria entra na suíte vista
+> vermelha antes do fix (`schematize-regression` → `references/contrato-dados-ia.md`).
+
 ## 4. Quarentena e dead-letter — o destino do dado ruim (o piso)
 
 O que reprova **não** entra no dataset bom e **não** é jogado fora:
